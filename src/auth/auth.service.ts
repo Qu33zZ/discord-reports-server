@@ -1,5 +1,5 @@
 import {BadRequestException, Injectable, UnauthorizedException} from '@nestjs/common';
-import axios from "axios";
+import * as qs from "qs";
 import {$discordAxiosUnAuth} from "../discord-api/discord.axios.instance";
 import {DiscordApiService} from "../discord-api/discord-api.service";
 import {InjectRepository} from "@nestjs/typeorm";
@@ -21,23 +21,25 @@ export class AuthService {
 				client_id: process.env.CLIENT_ID,
 				client_secret: process.env.CLIENT_SECRET,
 				grant_type: 'authorization_code',
+				redirect_uri:"http://localhost:3000",
 				code,
 			};
 			const headers = {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			};
 
-			const response = await $discordAxiosUnAuth.post("/oauth2/token", data, {headers});
+			const response = await $discordAxiosUnAuth.post("/oauth2/token", qs.stringify(data), {headers});
 
 			if(response.status === 200) return await this.createSession(response.data);
 			else throw new UnauthorizedException({message:"Invalid authorization code"});
 		}catch (e){
+			console.log(JSON.stringify(e));
 			throw new UnauthorizedException({message:"Invalid authorization code"});
 		}
 	};
 
 	private async createSession(authData:IAuth){
-		const user:IUser = await this.discordApiService.getMe(authData);
+		const user:IUser = await this.discordApiService.getMe(authData.access_token);
 		let session = await this.sessionsRepo.findOne({where:{user_id:user.id}});
 		if(!session) session = new SessionEntity();
 
@@ -59,17 +61,17 @@ export class AuthService {
 			const data = {
 				client_id: process.env.CLIENT_ID,
 				client_secret: process.env.CLIENT_SECRET,
-				'grant_type': 'refresh_token',
-				'refresh_token': refreshToken
+				grant_type: 'refresh_token',
+				refresh_token: refreshToken
 			}
 			const headers = {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
-
-			const response = await $discordAxiosUnAuth.post("/oauth2/token", data, {headers});
+			const response = await $discordAxiosUnAuth.post("/oauth2/token", qs.stringify(data), {headers});
 			if(response.status === 200) return await this.createSession(response.data);
 			else throw new BadRequestException({message:"Invalid refresh token"});
 		}catch (e){
+			console.log(e);
 			throw new BadRequestException({message:"Invalid refresh token"});
 		}
 	};

@@ -5,11 +5,8 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {ReportEntity} from "./entities/report.entity";
 import {MongoRepository} from "typeorm";
 import {DiscordApiService} from "../discord-api/discord-api.service";
-import {IUser} from "../discord-api/interfaces/IUser";
 import {IReport} from "./interfaces/IReport";
-import retryTimes = jest.retryTimes;
-import {reportTranspileErrors} from "ts-loader/dist/instances";
-import {Collection} from "@nestjs/cli/lib/schematics";
+
 
 @Injectable()
 export class ReportsService {

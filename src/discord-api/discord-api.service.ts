@@ -4,6 +4,9 @@ import {$discordAxios, $discordAxiosUnAuth} from "./discord.axios.instance";
 import {WebSocket} from "ws";
 import {response} from "express";
 import {IAuth} from "../auth/interfaces/IAuth";
+import {SessionEntity} from "../auth/models/session.entity";
+import {IGuild} from "./interfaces/IGuild";
+import {IGuildMember} from "./interfaces/IGuildMember";
 
 
 @Injectable()
@@ -46,6 +49,15 @@ export class DiscordApiService {
 	}
 
 
+	async getGuildMember(guildId:string, memberId:string):Promise<IGuildMember>{
+		try {
+			const memberResponse = await $discordAxios.get<IGuildMember>(`/guilds/${guildId}/members/${memberId}`);
+			return memberResponse.data;
+		}catch (e){
+			console.log(e);
+			return null;
+		}
+	}
 	async getUser(id:string):Promise<IUser>{
 		try {
 			const userResponse = await $discordAxios.get<IUser>(`/users/${id}`);
@@ -113,13 +125,38 @@ export class DiscordApiService {
 	};
 
 
-	async getMe(authData:IAuth){
+	async getMe(accessToken:string){
 		try {
-			const response = await $discordAxiosUnAuth.get("/users/@me", {headers:{authorization:`${authData.token_type} ${authData.access_token}`}});
+			const response = await $discordAxiosUnAuth.get("/users/@me", {headers:{authorization:`Bearer ${accessToken}`}});
 			if(response.status === 200) return response.data;
 			return null;
 		}catch (err){
-			return null
+			throw err;
 		}
-	}
+	};
+
+	async getGuild(guildId:string):Promise<IGuild | null>{
+		try {
+			const guildResponse = await $discordAxios.get<IGuild>(`/guilds/${guildId}`);
+			if(guildResponse.status === 200) return guildResponse.data;
+			return null;
+		}catch(e){
+			return null;
+		}
+	};
+
+
+	private async filterGuildsWithAccess(){
+
+	};
+
+	async getUserGuilds(accessToken:string):Promise<IGuild[]> {
+		try {
+			const response = await $discordAxiosUnAuth.get("/users/@me/guilds", {headers: {authorization: `Bearer ${accessToken}`}});
+			if (response.status === 200) return response.data;
+			return null;
+		} catch (err) {
+			throw err;
+		}
+	};
 }

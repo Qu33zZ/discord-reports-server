@@ -4,13 +4,17 @@ import { ReportsController } from './reports.controller';
 import {DiscordApiModule} from "../discord-api/discord-api.module";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {ReportEntity} from "./entities/report.entity";
+import {SessionEntity} from "../auth/models/session.entity";
+import {GuildSettingsEntity} from "../guilds-settings/entities/guild.settings.entity";
+import {UserModule} from "../user/user.module";
 
 @Module({
   controllers: [ReportsController],
   providers: [ReportsService],
   imports:[
       DiscordApiModule,
-      TypeOrmModule.forFeature([ReportEntity])
+      UserModule,
+      TypeOrmModule.forFeature([ReportEntity, SessionEntity, GuildSettingsEntity]),
   ]
 })
 export class ReportsModule {}
