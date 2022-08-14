@@ -12,8 +12,8 @@ export class UserService {
 	constructor(
 		private discordApiService:DiscordApiService,
 		@InjectRepository(GuildSettingsEntity) private guildSettingsRepo:MongoRepository<GuildSettingsEntity>,
-	) {
-	}
+	) {};
+
 	async getMe(accessToken:string):Promise<IUser>{
 		return await this.discordApiService.getMe(accessToken);
 	}
@@ -32,7 +32,7 @@ export class UserService {
 		}
 		console.log(`Filter finished in ${Date.now() - start} ms`);
 		return guilds as IGuild[];
-	}
+	};
 
 	async checkUserAccessToGuild(userId:string, guildId:string, settings:IGuildAccessCheckSettings):Promise<boolean>{
 		const guildSettings = await this.guildSettingsRepo.findOne({where:{guildId}});

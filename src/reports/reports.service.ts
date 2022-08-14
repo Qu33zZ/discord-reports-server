@@ -6,6 +6,7 @@ import {ReportEntity} from "./entities/report.entity";
 import {MongoRepository} from "typeorm";
 import {DiscordApiService} from "../discord-api/discord-api.service";
 import {IReport} from "./interfaces/IReport";
+import {IGuildMember} from "../discord-api/interfaces/IGuildMember";
 
 
 @Injectable()
@@ -22,8 +23,8 @@ export class ReportsService {
 	}
 
 	async findAll(page:number, itemsOnPage:number, guildId?:string):Promise<IReport[]> {
-		page = page ?? 1;
-		itemsOnPage = itemsOnPage ?? 10;
+		page = page || 1;
+		itemsOnPage = itemsOnPage || 10;
 		const itemsToSkipp = page * itemsOnPage - itemsOnPage;
 
 		let reports:ReportEntity[] = [];
@@ -43,7 +44,7 @@ export class ReportsService {
 			return acc;
 		}, new Map<string, Set<string>>())
 
-		const allGuildsUsers = new Map<string, Map<string, any>>()
+		const allGuildsUsers = new Map<string, Map<string, IGuildMember>>()
 
 		for(const [guildId, members] of allGuildsUsersIds){
 			const guildMembers = await this.discordApiService.getUsersByIds(Array.from(members), guildId);
@@ -51,9 +52,8 @@ export class ReportsService {
 		}
 
 		for(const report of reports){
-			report.fromUser = allGuildsUsers.get(report.guild)?.get(report.fromUser);
-			report.toUser = allGuildsUsers.get(report.guild)?.get(report.toUser);
-
+			report.fromUser = (allGuildsUsers.get(report.guild)?.get(report.fromUser)?.user  || report.fromUser) as any;
+			report.toUser = (allGuildsUsers.get(report.guild)?.get(report.toUser)?.user || report.toUser) as any;
 		}
 
 		return reports as unknown as IReport[]

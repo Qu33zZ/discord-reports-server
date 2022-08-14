@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query} from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { UpdateReportDto } from './dto/update-report.dto';
@@ -6,6 +6,7 @@ import {ReportEntity} from "./entities/report.entity";
 import {IReport} from "./interfaces/IReport";
 import {DiscordAuthGuard} from "../auth/guards/auth.guard";
 import {GuildPermissionsGuard} from "../guilds-settings/guards/settings.guard";
+import {AccessSettings} from "../guilds-settings/decorators/access.settings.decorator";
 
 @Controller('reports')
 export class ReportsController {
@@ -16,10 +17,11 @@ export class ReportsController {
 		return await this.reportsService.create(createReportDto);
 	}
 
-	@Get()
+	@Get("/:guildId")
+	@AccessSettings({admin:true, settingsExists:true, rolesAllowed:true, owner:true})
 	@UseGuards(DiscordAuthGuard, GuildPermissionsGuard)
-	async findAll(@Param("page") page:number, @Param("onPage") itemsOnPage:number):Promise<IReport[]> {
-		return await this.reportsService.findAll(+page, +itemsOnPage);
+	async findAll(@Query("page") page:number, @Query("onPage") itemsOnPage:number, @Param("guildId") guildId:string):Promise<IReport[]> {
+		return await this.reportsService.findAll(+page, +itemsOnPage, guildId);
 	}
 
 	@Get(':id')
