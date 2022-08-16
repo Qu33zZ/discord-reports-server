@@ -22,12 +22,12 @@ export class ReportsService {
 		return report;
 	}
 
-	async findAll(page:number, itemsOnPage:number, guildId?:string):Promise<IReport[]> {
+	async findAll(page:number, itemsOnPage:number, guildId?:string):Promise<{reports:IReport[], pagesCount:number}> {
 		page = page || 1;
 		itemsOnPage = itemsOnPage || 10;
 		const itemsToSkipp = page * itemsOnPage - itemsOnPage;
 
-		let reports:ReportEntity[] = [];
+		let reports:ReportEntity[];
 
 		if(guildId) reports = await this.reportsRepository.find({order:{createdAt:"DESC"}, skip:itemsToSkipp, take:itemsOnPage, where:{guild:guildId}});
 		else reports = await this.reportsRepository.find({order:{createdAt:"DESC"}, skip:itemsToSkipp, take:itemsOnPage});
@@ -56,9 +56,18 @@ export class ReportsService {
 			report.toUser = (allGuildsUsers.get(report.guild)?.get(report.toUser)?.user || report.toUser) as any;
 		}
 
-		return reports as unknown as IReport[]
+		const pagesCount = await this.countReportsPages(guildId, itemsOnPage);
+		const allReports = reports as unknown as IReport[];
+		return {
+				reports:allReports,
+				pagesCount,
+			}
 	};
 
+	private async countReportsPages(guildId:string, itemsOnPage:number){
+		const reportsCount = await this.reportsRepository.count({guild:guildId})
+		return Math.ceil(reportsCount/itemsOnPage);
+	}
 	async findOne(id: string) {
 		const report = await this.reportsRepository.findOne({where:{id}});
 		if(!report) throw new NotFoundException({message:"Report not found"});

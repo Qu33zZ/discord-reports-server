@@ -20,7 +20,7 @@ export class ReportsController {
 	@Get("/:guildId")
 	@AccessSettings({admin:true, settingsExists:true, rolesAllowed:true, owner:true})
 	@UseGuards(DiscordAuthGuard, GuildPermissionsGuard)
-	async findAll(@Query("page") page:number, @Query("onPage") itemsOnPage:number, @Param("guildId") guildId:string):Promise<IReport[]> {
+	async findAll(@Query("page") page:number, @Query("onPage") itemsOnPage:number, @Param("guildId") guildId:string):Promise<{reports:IReport[], pagesCount:number}> {
 		return await this.reportsService.findAll(+page, +itemsOnPage, guildId);
 	}
 

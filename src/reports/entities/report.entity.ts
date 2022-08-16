@@ -34,5 +34,5 @@ export class ReportEntity extends BaseEntity{
 	moderId:string = null;
 
 	@Column()
-	createdAt:Date;
+	createdAt:Date = new Date();
 }

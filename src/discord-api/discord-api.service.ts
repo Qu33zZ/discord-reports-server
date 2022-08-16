@@ -82,7 +82,6 @@ export class DiscordApiService {
 	};
 
 	getUsersByIds(idsArray:string[], guildId:string):Promise<Map<string, any>>{
-		console.log("GET USERS")
 		return new Promise((resolve, reject) =>{
 			const reqMembersData = {
 				"op": 8,
