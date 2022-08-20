@@ -21,12 +21,17 @@ export class GuildPermissionsGuard implements CanActivate {
 
 		const token = request?.headers?.authorization?.split(" ")[1];
 		const guildId = request.params.guildId;
+		console.log(request.params)
+		console.log(guildId)
 
 		const user = await this.discordApiService.getMe(token);
-		if(!user) return false;
+		if(!user) {
+			console.log("No user");
+			return false;
+		}
 
 		const checkAccessSettings:IGuildAccessCheckSettings = Reflect.getMetadata("checkAccessSettings", context.getHandler());
-
+		console.log(checkAccessSettings)
 		return await this.userService.checkUserAccessToGuild(user.id, guildId, checkAccessSettings);
 	}
 }

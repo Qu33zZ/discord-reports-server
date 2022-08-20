@@ -36,13 +36,19 @@ export class UserService {
 
 	async checkUserAccessToGuild(userId:string, guildId:string, settings:IGuildAccessCheckSettings):Promise<boolean>{
 		const guildSettings = await this.guildSettingsRepo.findOne({where:{guildId}});
-		if( settings.settingsExists && !guildSettings) return false;
+		if(settings.settingsExists && !guildSettings){
+			return false;
+		}
 
 		const guild = await this.discordApiService.getGuild(guildId);
-		if(!guild) return false;
+		if(!guild) {
+			return false;
+		}
 
 		const member = await this.discordApiService.getGuildMember(guildId, userId);
-		if(!member) return false;
+		if(!member) {
+			return false;
+		}
 
 		const isMemberAllowedByRoles = member.roles.some(role => guildSettings?.allowedRoles?.includes(role.id));
 		const isMemberOwner = member.user.id === guild.owner_id;

@@ -78,17 +78,17 @@ export class ReportsService {
 		return {...report, fromUser:fromUser, toUser:toUser};
 	};
 
-	async update(id: string, updateReportDto: UpdateReportDto) {
+	async update(id: string, updateReportDto: UpdateReportDto):Promise<ReportEntity>{
 		const report = await this.reportsRepository.findOne({where:{id}});
 		if(!report) throw new NotFoundException({message:"Report not found"});
 
-		if(report.moderId !== updateReportDto.moder) throw new ForbiddenException({message:"This report already taken by another moderator!"});
+		if(report.moderId && report.moderId !== updateReportDto.moder) throw new ForbiddenException({message:"This report already taken by another moderator!"});
 
 		report.status = updateReportDto.status;
 		report.moderId = updateReportDto.moder;
 
 		await report.save();
-
+		console.log(report);
 		return report;
 	}
 

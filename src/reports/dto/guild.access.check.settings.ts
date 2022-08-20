@@ -3,4 +3,5 @@ export interface IGuildAccessCheckSettings{
 	admin:boolean,
 	owner:boolean;
 	rolesAllowed:boolean;
+	bot?:boolean;
 }
