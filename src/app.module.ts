@@ -8,6 +8,7 @@ import {SessionEntity} from "./auth/models/session.entity";
 import { UserModule } from './user/user.module';
 import { GuildsSettingsModule } from './guilds-settings/guilds-settings.module';
 import {GuildSettingsEntity} from "./guilds-settings/entities/guild.settings.entity";
+import { WebsocketsModule } from './websockets/websockets.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import {GuildSettingsEntity} from "./guilds-settings/entities/guild.settings.ent
           entities: [ReportEntity, SessionEntity, GuildSettingsEntity],
       }),
       UserModule,
-      GuildsSettingsModule
+      GuildsSettingsModule,
+      WebsocketsModule
 
   ],
 })

@@ -7,19 +7,25 @@ import {MongoRepository} from "typeorm";
 import {DiscordApiService} from "../discord-api/discord-api.service";
 import {IReport} from "./interfaces/IReport";
 import {IGuildMember} from "../discord-api/interfaces/IGuildMember";
+import {WebsocketsService} from "../websockets/websockets.service";
+import {IUser} from "../discord-api/interfaces/IUser";
 
 
 @Injectable()
 export class ReportsService {
 	constructor(
 		@InjectRepository(ReportEntity) private reportsRepository:MongoRepository<ReportEntity>,
-		private discordApiService:DiscordApiService
+		private discordApiService:DiscordApiService,
+		private websocketsService:WebsocketsService
 	) {};
 
-	async create(createReportDto: CreateReportDto):Promise<ReportEntity>{
+	async create(createReportDto: CreateReportDto):Promise<IReport<IUser>>{
 		const report = this.reportsRepository.create(createReportDto);
 		await report.save();
-		return report;
+
+		const fullReport = await this.getFullReportData(report);
+		this.sendReportToClients(fullReport);
+		return fullReport;
 	}
 
 	async findAll(page:number, itemsOnPage:number, guildId?:string):Promise<{reports:IReport[], pagesCount:number}> {
@@ -68,6 +74,11 @@ export class ReportsService {
 		const reportsCount = await this.reportsRepository.count({guild:guildId})
 		return Math.ceil(reportsCount/itemsOnPage);
 	}
+
+	private async sendReportToClients(report:IReport<IUser>){
+		this.websocketsService.sendMessageToAllClients("report", report);
+	};
+
 	async findOne(id: string) {
 		const report = await this.reportsRepository.findOne({where:{id}});
 		if(!report) throw new NotFoundException({message:"Report not found"});
@@ -82,10 +93,10 @@ export class ReportsService {
 		const report = await this.reportsRepository.findOne({where:{id}});
 		if(!report) throw new NotFoundException({message:"Report not found"});
 
-		if(report.moderId && report.moderId !== updateReportDto.moder) throw new ForbiddenException({message:"This report already taken by another moderator!"});
+		if(report.moder && report.moder !== updateReportDto.moder) throw new ForbiddenException({message:"This report already taken by another moderator!"});
 
 		report.status = updateReportDto.status;
-		report.moderId = updateReportDto.moder;
+		report.moder = updateReportDto.moder;
 
 		await report.save();
 		console.log(report);
@@ -100,5 +111,17 @@ export class ReportsService {
 
 		return report;
 	}
+
+	private async getFullReportData(report:IReport):Promise<IReport<IUser>>{
+		const fromUser = await this.discordApiService.getUser(report.fromUser);
+		const toUser = await this.discordApiService.getUser(report.toUser);
+		if(report.moder){
+			const moder = await this.discordApiService.getUser(report.moder);
+			return {...report, fromUser, toUser, moder:moder};
+		}
+
+		return {...report, fromUser, toUser};
+
+	};
 }
 

@@ -7,6 +7,7 @@ import {ReportEntity} from "./entities/report.entity";
 import {SessionEntity} from "../auth/models/session.entity";
 import {GuildSettingsEntity} from "../guilds-settings/entities/guild.settings.entity";
 import {UserModule} from "../user/user.module";
+import {WebsocketsModule} from "../websockets/websockets.module";
 
 @Module({
   controllers: [ReportsController],
@@ -15,6 +16,7 @@ import {UserModule} from "../user/user.module";
       DiscordApiModule,
       UserModule,
       TypeOrmModule.forFeature([ReportEntity, SessionEntity, GuildSettingsEntity]),
+      WebsocketsModule
   ]
 })
 export class ReportsModule {}

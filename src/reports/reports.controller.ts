@@ -28,7 +28,7 @@ export class ReportsController {
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	async create(@Body() createReportDto: CreateReportDto):Promise<ReportEntity> {
+	async create(@Body() createReportDto: CreateReportDto):Promise<IReport<IUser>> {
 		return await this.reportsService.create(createReportDto);
 	}
 
@@ -42,7 +42,7 @@ export class ReportsController {
 	@Get(':id')
 	@AccessSettings({admin:true, settingsExists:true, rolesAllowed:true, owner:true})
 	@UseGuards(DiscordAuthGuard, GuildPermissionsGuard)
-	async findOne(@Param('id') id: string) :Promise<IReport>{
+	async findOne(@Param('id') id: string):Promise<IReport<IUser>>{
 		return this.reportsService.findOne(id);
 	}
 

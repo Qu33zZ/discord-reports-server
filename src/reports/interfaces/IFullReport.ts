@@ -1,14 +1,14 @@
 import {IUser} from "../../discord-api/interfaces/IUser";
 import {reportStatusType} from "../entities/report.entity";
 
-export interface IReport<T=string>{
+export interface IReport{
 	id:string;
 	guild:string;
 
-	fromUser:T;
-	toUser:T;
+	fromUser:IUser | string;
+	toUser:IUser | string;
 
-	moder:T | string;
+	moderId:string;
 
 	reason:string;
 	status:reportStatusType;

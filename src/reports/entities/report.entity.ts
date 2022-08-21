@@ -31,7 +31,7 @@ export class ReportEntity extends BaseEntity{
 	status: reportStatusType = "CREATED";
 
 	@Column({nullable:true})
-	moderId:string = null;
+	moder:string = null;
 
 	@Column()
 	createdAt:Date = new Date();
