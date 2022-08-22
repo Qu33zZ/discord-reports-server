@@ -3,7 +3,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {SessionEntity} from "../models/session.entity";
 import {MongoRepository} from "typeorm";
 import {DiscordApiService} from "../../discord-api/discord-api.service";
-import {AccessToken} from "../../user/decorators/access.token.decorator";
+import {AccessToken} from "../decorators/access.token.decorator";
 
 @Injectable()
 export class DiscordAuthGuard implements CanActivate {

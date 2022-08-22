@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable, UnauthorizedException} from '@nestjs/common';
+import {BadRequestException, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import * as qs from "qs";
 import {$discordAxiosUnAuth} from "../discord-api/discord.axios.instance";
 import {DiscordApiService} from "../discord-api/discord-api.service";
@@ -74,5 +74,11 @@ export class AuthService {
 			console.log(e);
 			throw new BadRequestException({message:"Invalid refresh token"});
 		}
+	};
+
+	async logout(accessToken:string):Promise<void>{
+		const session = await this.sessionsRepo.findOne({where:{accessToken}});
+		if(!session) throw new NotFoundException({message:"Session not found"});
+		await session.remove();
 	};
 }

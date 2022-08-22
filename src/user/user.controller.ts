@@ -2,7 +2,7 @@ import {Controller, Get, HttpCode, HttpStatus, Req, UseGuards} from '@nestjs/com
 import { UserService } from './user.service';
 import {Request} from "express";
 import {DiscordAuthGuard} from "../auth/guards/auth.guard";
-import {AccessToken} from "./decorators/access.token.decorator";
+import {AccessToken} from "../auth/decorators/access.token.decorator";
 import {User} from "./decorators/user.decorator";
 import {IUser} from "../discord-api/interfaces/IUser";
 
