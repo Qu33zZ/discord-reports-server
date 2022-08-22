@@ -1,4 +1,4 @@
-import {BadRequestException, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
+import {BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import * as qs from "qs";
 import {$discordAxiosUnAuth} from "../discord-api/discord.axios.instance";
 import {DiscordApiService} from "../discord-api/discord-api.service";
@@ -7,13 +7,18 @@ import {SessionEntity} from "./models/session.entity";
 import {MongoRepository} from "typeorm";
 import {IAuth} from "./interfaces/IAuth";
 import {IUser} from "../discord-api/interfaces/IUser";
+import {Cron, CronExpression} from "@nestjs/schedule";
 
 @Injectable()
 export class AuthService {
+	private readonly logger:Logger;
 	constructor(
 		private discordApiService:DiscordApiService,
 		@InjectRepository(SessionEntity) private sessionsRepo:MongoRepository<SessionEntity>,
-	) {};
+	) {
+		this.logger = new Logger(AuthService.name);
+		this.deleteOldSessions();
+	};
 
 	async authorize(code:string){
 		try {
@@ -47,6 +52,7 @@ export class AuthService {
 		session.accessToken = authData.access_token;
 		session.refreshToken = authData.refresh_token;
 		session.accessTokenType = authData.token_type;
+		session.createdAt = new Date();
 
 		await session.save();
 
@@ -80,5 +86,11 @@ export class AuthService {
 		const session = await this.sessionsRepo.findOne({where:{accessToken}});
 		if(!session) throw new NotFoundException({message:"Session not found"});
 		await session.remove();
+	};
+
+	@Cron(CronExpression.EVERY_HOUR)
+	private async deleteOldSessions(){
+		await this.sessionsRepo.deleteMany({$where:"new Date().getTime() > this.createdAt.getTime() + 5*24*60*60*1000"});
+		this.logger.log("Deleting old sessions from database")
 	};
 }

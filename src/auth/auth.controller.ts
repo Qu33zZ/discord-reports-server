@@ -1,6 +1,7 @@
-import {Controller, HttpCode, HttpStatus, Param, Post} from '@nestjs/common';
+import {Controller, HttpCode, HttpStatus, Param, Post, UseGuards} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {AccessToken} from "./decorators/access.token.decorator";
+import {DiscordAuthGuard} from "./guards/auth.guard";
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,7 @@ export class AuthController {
 
   @Post("/logout")
   @HttpCode(HttpStatus.OK)
+  @UseGuards(DiscordAuthGuard)
   async logout(@AccessToken() accessToken:string){
     return await this.authService.logout(accessToken);
   }
